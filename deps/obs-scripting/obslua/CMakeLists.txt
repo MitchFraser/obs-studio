@@ -31,14 +31,24 @@ function(install_plugin_bin_swig target additional_target)
 	set_target_properties(${additional_target} PROPERTIES
 		PREFIX "")
 
-	install(TARGETS "${additional_target}"
-		LIBRARY DESTINATION "${OBS_SCRIPT_PLUGIN_DESTINATION}")
 
+	install(TARGETS "${additional_target}"
+			LIBRARY DESTINATION "${OBS_SCRIPT_PLUGIN_DESTINATION}")
+
+if (APPLE)
+	add_custom_command(TARGET ${additional_target} POST_BUILD
+			COMMAND "${CMAKE_COMMAND}" -E copy
+			"$<TARGET_FILE:${additional_target}>"
+			"${OBS_OUTPUT_DIR}/$<CONFIGURATION>/bin/${_bit_suffix}$<TARGET_FILE_NAME:${additional_target}>"
+			VERBATIM)
+else()
 	add_custom_command(TARGET ${additional_target} POST_BUILD
 		COMMAND "${CMAKE_COMMAND}" -E copy
 			"$<TARGET_FILE:${additional_target}>"
 			"${OBS_OUTPUT_DIR}/$<CONFIGURATION>/data/obs-scripting/${_bit_suffix}$<TARGET_FILE_NAME:${additional_target}>"
 		VERBATIM)
+endif()
+
 endfunction()
 
 install_plugin_bin_swig(obs-scripting obslua)
